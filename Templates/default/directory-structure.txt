@@ -1,0 +1,14 @@
+# Directories to create when initializing a project from this template.
+# One path per line. Use {{PACKAGE_NAME}} for the Python package name.
+
+.tasks/backlog/
+.tasks/in-progress/
+.tasks/done/
+.tasks/merged/
+specs/
+src/{{PACKAGE_NAME}}/
+tests/unit/
+tests/integration/
+tests/e2e/
+docs/
+reports/

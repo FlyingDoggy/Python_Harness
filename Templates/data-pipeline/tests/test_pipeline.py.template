@@ -1,0 +1,25 @@
+"""Tests for {{PROJECT_NAME}} pipeline."""
+
+from pathlib import Path
+
+import polars as pl
+
+from {{PACKAGE_NAME}}.pipeline import load_csv, run_pipeline
+
+
+def test_load_csv(tmp_path: Path) -> None:
+    csv_file = tmp_path / "test.csv"
+    csv_file.write_text("a,b\n1,2\n3,4\n")
+    df = load_csv(csv_file)
+    assert df.shape == (2, 2)
+    assert df.columns == ["a", "b"]
+
+
+def test_run_pipeline(tmp_path: Path) -> None:
+    input_file = tmp_path / "input.csv"
+    output_file = tmp_path / "output.csv"
+    input_file.write_text("x,y\n10,20\n")
+    run_pipeline(input_file, output_file)
+    assert output_file.exists()
+    result = pl.read_csv(output_file)
+    assert result.shape[0] > 0

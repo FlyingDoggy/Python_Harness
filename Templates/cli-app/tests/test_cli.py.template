@@ -1,0 +1,12 @@
+"""Tests for {{PROJECT_NAME}} CLI."""
+
+from click.testing import CliRunner
+
+from {{PACKAGE_NAME}}.cli import main
+
+
+def test_hello() -> None:
+    runner = CliRunner()
+    result = runner.invoke(main, ["hello"])
+    assert result.exit_code == 0
+    assert "Hello from {{PROJECT_NAME}}" in result.output

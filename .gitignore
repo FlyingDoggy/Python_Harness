@@ -1,0 +1,11 @@
+# 排除所有项目工作区
+Workspace/
+
+# Python 通用
+__pycache__/
+*.py[cod]
+.venv/
+
+# IDE
+.vscode/
+.idea/
