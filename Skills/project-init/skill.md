@@ -7,7 +7,7 @@ Use this skill when the user asks to create a new Python project. This skill ini
 Before starting, confirm with the user:
 1. **Project name** (kebab-case, e.g., `my-tool`)
 2. **Brief description** (one sentence)
-3. **Template** (default, cli-app, web-api, data-pipeline — default if not specified)
+3. **Template** (default, cli-app, web-api, web-app, data-pipeline — default if not specified)
 
 ## Initialization Steps
 
@@ -15,7 +15,9 @@ Execute these steps in order:
 
 ### Step 1: Create directory structure
 
-Create the project at `Workspace/<project-name>/` with:
+The `<package_name>` is the project name with hyphens replaced by underscores.
+
+For **default, cli-app, web-api, data-pipeline** templates, create the project at `Workspace/<project-name>/` with:
 ```
 .tasks/backlog/
 .tasks/in-progress/
@@ -33,11 +35,29 @@ docs/
 reports/
 ```
 
-The `<package_name>` is the project name with hyphens replaced by underscores.
+For the **web-app** template (Python backend + React frontend), create:
+```
+.tasks/backlog/
+.tasks/in-progress/
+.tasks/done/
+.tasks/merged/
+specs/
+backend/src/<package_name>/
+  __init__.py
+backend/tests/
+  conftest.py
+  unit/
+  integration/
+  e2e/
+frontend/src/
+frontend/public/
+docs/
+reports/
+```
 
 ### Step 2: Generate pyproject.toml
 
-If using `default` template, use `Templates/default/pyproject.toml.template`. Otherwise use the template-specific version: `Templates/<template>/pyproject.toml.template`.
+If using `default` template, use `Templates/default/pyproject.toml.template`. Otherwise use the template-specific version: `Templates/<template>/pyproject.toml.template`. For `web-app`, use `Templates/web-app/backend/pyproject.toml.template` → `backend/pyproject.toml`.
 
 Replace in all templates:
 - `{{PROJECT_NAME}}` → project name
@@ -50,20 +70,30 @@ Each template includes boilerplate source and test files. Copy and replace place
 
 - **cli-app**: `Templates/cli-app/src/cli.py.template` → `src/<package_name>/cli.py`, `Templates/cli-app/tests/test_cli.py.template` → `tests/unit/test_cli.py`
 - **web-api**: `Templates/web-api/src/app.py.template` → `src/<package_name>/app.py`, `Templates/web-api/tests/test_app.py.template` → `tests/unit/test_app.py`
+- **web-app**: Composite project. Copy backend files from `Templates/web-app/backend/` into `backend/`, and frontend files from `Templates/web-app/frontend/` into `frontend/`:
+  - `backend/src/app.py.template` → `backend/src/<package_name>/app.py`
+  - `backend/src/__init__.py.template` → `backend/src/<package_name>/__init__.py`
+  - `backend/tests/conftest.py.template` → `backend/tests/conftest.py`
+  - `backend/tests/test_app.py.template` → `backend/tests/unit/test_app.py`
+  - `frontend/package.json.template` → `frontend/package.json`
+  - `frontend/vite.config.ts.template` → `frontend/vite.config.ts`
+  - `frontend/tsconfig.json.template` → `frontend/tsconfig.json`
+  - `frontend/index.html.template` → `frontend/index.html`
+  - `frontend/src/main.tsx.template` → `frontend/src/main.tsx`
+  - `frontend/src/App.tsx.template` → `frontend/src/App.tsx`
+  - `frontend/src/index.css.template` → `frontend/src/index.css`
 - **data-pipeline**: `Templates/data-pipeline/src/pipeline.py.template` → `src/<package_name>/pipeline.py`, `Templates/data-pipeline/tests/test_pipeline.py.template` → `tests/unit/test_pipeline.py`
 - **default**: no extra source files
 
-All other files (.gitignore, CLAUDE.md, directory-structure, conftest.py, __init__.py, .python-version) always come from `Templates/default/`.
+All other files (.gitignore, .python-version) always come from `Templates/default/`. For CLAUDE.md, `web-app` uses `Templates/web-app/CLAUDE.md.template`; all others use `Templates/default/CLAUDE.md.template`.
 
 ### Step 3: Generate .gitignore
 
-Copy from `Templates/default/gitignore.template`.
+Copy from `Templates/default/gitignore.template`. For `web-app`, also add `node_modules/` and `dist/` entries.
 
 ### Step 4: Generate CLAUDE.md
 
-Use the template from `Templates/default/CLAUDE.md.template`, replacing placeholders.
-
-The project CLAUDE.md must be fully self-contained. It is the sole instruction source for coding agents working via git worktree. It must include: project overview, directory structure, all dev commands, task workflow (how to pick up and complete tasks from `.tasks/`), git rules, commit format, code standards, quality gate, and hard rules.
+For `web-app`, use `Templates/web-app/CLAUDE.md.template`. For all others, use `Templates/default/CLAUDE.md.template`. Replace placeholders.
 
 ### Step 5: Generate functional spec template
 
@@ -71,13 +101,22 @@ Copy `Prompts/spec-template.md` to `specs/functional-spec.md`, replacing `{{项�
 
 ### Step 6: Create .python-version
 
-Write `3.11` (or the user-specified version) to `.python-version`.
+Write `3.11` (or the user-specified version) to `.python-version`. For `web-app`, place it in `backend/.python-version`.
 
-### Step 7: Initialize uv project
+### Step 7: Initialize environments
 
+For standard templates:
 ```bash
 cd Workspace/<project-name>
 uv sync
+```
+
+For `web-app`:
+```bash
+cd Workspace/<project-name>/backend
+uv sync
+cd ../frontend
+npm install
 ```
 
 ### Step 8: Initialize Git repo

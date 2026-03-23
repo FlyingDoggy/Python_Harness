@@ -1,0 +1,159 @@
+# {{PROJECT_NAME}}
+
+You are a Coding Agent working on this project. This file contains everything you need. You have no access to any parent harness or other agents' context.
+
+## Project
+
+{{PROJECT_DESCRIPTION}}
+
+This is a fullstack web application with a Python backend (FastAPI) and React frontend (TypeScript).
+
+## Structure
+
+```
+backend/
+  src/{{PACKAGE_NAME}}/    Python source code (src layout)
+  tests/unit/              unit tests
+  tests/integration/       integration tests
+  tests/e2e/               end-to-end tests
+  tests/conftest.py        shared fixtures
+  pyproject.toml           Python project config
+frontend/
+  src/                     React TypeScript source
+  public/                  static assets
+  package.json             Node.js project config
+  vite.config.ts           Vite build config
+specs/                     functional spec
+.tasks/                    task queue (see Task Workflow below)
+docs/                      documentation
+reports/                   generated reports
+```
+
+## Tech Stack
+
+- **Backend**: Python 3.11+, FastAPI, uvicorn, Pydantic v2
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4, react-router-dom
+
+## Commands
+
+### Backend (run from `backend/` directory)
+
+```bash
+uv sync                        # install/sync all dependencies
+uv add <package>               # add production dependency
+uv add --dev <package>         # add dev dependency
+uv run pytest                  # run tests
+uv run pytest --cov=src        # run tests + coverage
+uv run ruff check .            # lint
+uv run ruff format .           # format code
+uv run ruff format --check .   # check format (no modify)
+uv run mypy src/               # type check (strict mode)
+uv run uvicorn {{PACKAGE_NAME}}.app:app --reload  # start dev server (port 8000)
+```
+
+### Frontend (run from `frontend/` directory)
+
+```bash
+npm install                    # install dependencies
+npm run dev                    # start dev server (Vite, port 5173)
+npm run build                  # production build
+npm run lint                   # lint (ESLint)
+npm run type-check             # type check (tsc)
+```
+
+## Task Workflow
+
+You receive work through task files. This is your operating loop:
+
+1. **Find your task**: Look in `.tasks/queue-agent-*/` or `.tasks/in-progress/` for a task file assigned to you. Read it completely — it contains the scope, branch name, acceptance criteria, dependencies, and notes.
+
+2. **Check dependencies**: If the task lists dependencies on other tasks, verify those tasks are in `.tasks/merged/` before starting. If not, wait or pick a different task.
+
+3. **Set up branch**: The task file specifies the branch name. If the branch doesn't exist yet, create it from main:
+   ```bash
+   git checkout -b <branch-name> main
+   ```
+   Move the task file to `.tasks/in-progress/`.
+
+4. **Develop with TDD** (backend tasks):
+   - Read the acceptance criteria in the task file and the referenced sections of `specs/functional-spec.md`.
+   - Write tests first (in appropriate test directory).
+   - Run tests — they should fail.
+   - Write implementation code to make tests pass.
+   - Refactor if needed.
+   - Commit incrementally. Each commit = one logical change.
+
+5. **Develop** (frontend tasks):
+   - Read the acceptance criteria.
+   - Implement components/features.
+   - Ensure type-check and lint pass.
+   - Commit incrementally.
+
+6. **Self-check**: Before marking done, run all checks. All must pass with zero errors:
+
+   Backend:
+   ```bash
+   cd backend && uv run pytest --tb=short -v
+   cd backend && uv run ruff check .
+   cd backend && uv run ruff format --check .
+   cd backend && uv run mypy src/
+   ```
+
+   Frontend:
+   ```bash
+   cd frontend && npm run lint
+   cd frontend && npm run type-check
+   cd frontend && npm run build
+   ```
+
+7. **Mark done**: Update all checkboxes in the task file's Status section. Move the task file to `.tasks/done/`. Do NOT merge to main — the planning agent handles merges.
+
+## Git Rules
+
+Never commit directly to main. Always work on the branch specified in your task file.
+
+Branch prefixes: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`
+
+Commit format: `<type>: <description>` (types: feat, fix, refactor, test, docs, chore)
+
+Code, comments, and commit messages: English. Specs and docs: Chinese.
+
+## Code Standards
+
+### Backend (Python)
+- Naming: PEP 8 (snake_case functions/variables, PascalCase classes)
+- Type annotations: required on all public functions (mypy strict)
+- Line width: 100 characters
+- Import ordering: managed by ruff (isort rules)
+
+### Frontend (TypeScript)
+- Naming: camelCase functions/variables, PascalCase components/types
+- Type annotations: strict TypeScript (no `any`)
+- Use functional components with hooks
+- CSS: Tailwind CSS utility classes
+
+## Quality Gate (all must pass before marking task done)
+
+### Backend
+1. `uv run pytest` — zero failures
+2. `uv run ruff check .` — zero lint issues
+3. `uv run ruff format --check .` — formatting correct
+4. `uv run mypy src/` — zero type errors
+
+### Frontend
+1. `npm run lint` — zero lint issues
+2. `npm run type-check` — zero type errors
+3. `npm run build` — builds successfully
+
+### Implementation matches acceptance criteria listed in the task file.
+
+## Hard Rules
+
+1. Never merge to main. The planning agent does that.
+2. Never skip writing tests before implementation (backend).
+3. Never work outside the scope defined in your task file.
+4. If you encounter a decision that requires architectural input (new dependency, interface change affecting other tasks, ambiguous spec), note it in the task file's Notes section and mark the task as blocked. Do not guess.
+
+## Current Status
+
+Initialized. Waiting for tasks from planning agent.

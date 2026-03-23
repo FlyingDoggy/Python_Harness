@@ -1,0 +1,17 @@
+# Directories to create when initializing a web-app project.
+# This template creates a composite project: Python backend + React frontend.
+# Use {{PACKAGE_NAME}} for the Python package name.
+
+.tasks/backlog/
+.tasks/in-progress/
+.tasks/done/
+.tasks/merged/
+specs/
+backend/src/{{PACKAGE_NAME}}/
+backend/tests/unit/
+backend/tests/integration/
+backend/tests/e2e/
+frontend/src/
+frontend/public/
+docs/
+reports/

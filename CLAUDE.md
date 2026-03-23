@@ -104,6 +104,7 @@ Read the skill file before executing each capability:
 | Review checklist | `Prompts/review-checklist.md` | Code review criteria |
 | Test plan template | `Prompts/test-plan-template.md` | Test planning structure |
 | Project scaffold | `Templates/default/` | Directory structure + config templates |
+| Web app scaffold | `Templates/web-app/` | Python backend + React frontend composite template |
 
 ## Harness Layout
 
