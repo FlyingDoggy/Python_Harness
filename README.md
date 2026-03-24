@@ -53,6 +53,7 @@ The planning agent will scaffold `Workspace/my-tool/` with everything ready to g
 | `default` | Pure Python | Libraries, utilities |
 | `cli-app` | click + rich | Command-line tools |
 | `web-api` | FastAPI + uvicorn | REST APIs |
+| `web-app` | FastAPI + React/TypeScript/Vite/Tailwind | Fullstack web applications |
 | `data-pipeline` | polars | Data processing |
 
 ## Development Workflow
@@ -83,6 +84,7 @@ All projects follow strict rules:
 │   ├── default/           Base template (shared by all)
 │   ├── cli-app/           Click CLI boilerplate
 │   ├── web-api/           FastAPI boilerplate
+│   ├── web-app/           Fullstack: FastAPI backend + React frontend
 │   └── data-pipeline/     Polars pipeline boilerplate
 ├── Prompts/           Reusable templates
 │   ├── spec-template.md       Functional spec structure

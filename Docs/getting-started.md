@@ -32,7 +32,7 @@
 - 初始化 uv 虚拟环境和 Git 仓库
 - 生成功能规格模板
 
-可选模板：`default`、`cli-app`、`web-api`、`data-pipeline`
+可选模板：`default`、`cli-app`、`web-api`、`web-app`、`data-pipeline`
 
 ### 2. 讨论需求和编写规格
 

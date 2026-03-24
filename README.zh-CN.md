@@ -53,6 +53,7 @@
 | `default` | 纯 Python | 库、工具 |
 | `cli-app` | click + rich | 命令行工具 |
 | `web-api` | FastAPI + uvicorn | REST API 服务 |
+| `web-app` | FastAPI + React/TypeScript/Vite/Tailwind | 全栈 Web 应用 |
 | `data-pipeline` | polars | 数据处理管道 |
 
 ## 开发工作流
@@ -83,6 +84,7 @@
 │   ├── default/           基础模板（所有模板共用）
 │   ├── cli-app/           Click CLI 脚手架
 │   ├── web-api/           FastAPI 脚手架
+│   ├── web-app/           全栈应用：FastAPI 后端 + React 前端
 │   └── data-pipeline/     Polars 数据管道脚手架
 ├── Prompts/           可复用模板
 │   ├── spec-template.md       功能规格结构
