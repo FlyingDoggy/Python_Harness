@@ -94,6 +94,12 @@ Read the skill file before executing each capability:
 | Spec writing & review | `Skills/spec-driven-dev/skill.md` | Planning Agent |
 | Quality gate (test/lint/type) | `Skills/test-runner/skill.md` | Both (Planning for merge check, Coding for self-check) |
 | Code review | `Skills/code-review/skill.md` | Planning Agent |
+| Write a PRD | `Skills/write-a-prd/SKILL.md` | Planning Agent |
+| PRD to implementation plan | `Skills/prd-to-plan/SKILL.md` | Planning Agent |
+| Interface design ("Design It Twice") | `Skills/design-an-interface/SKILL.md` | Planning Agent |
+| Architecture improvement (module deepening) | `Skills/improve-codebase-architecture/SKILL.md` | Planning Agent |
+| Frontend design (high-quality UI) | `Skills/frontend-design/SKILL.md` | Coding Agent |
+| Auto-improve loop (autonomous PRs) | `Skills/auto-improve/SKILL.md` | Planning Agent (Claude Code only) |
 
 ## Templates & Prompts
 
