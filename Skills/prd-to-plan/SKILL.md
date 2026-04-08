@@ -1,11 +1,11 @@
 ---
 name: prd-to-plan
-description: Turn a PRD into a multi-phase implementation plan using tracer-bullet vertical slices, saved as a local Markdown file in ./plans/. Use when user wants to break down a PRD, create an implementation plan, plan phases from a PRD, or mentions "tracer bullets".
+description: Turn a PRD into architectural decisions and vertical-slice phases, integrated directly into specs/functional-spec.md. Use when user wants to break down a PRD, plan phases from a PRD, or mentions "tracer bullets".
 ---
 
 # PRD to Plan
 
-Break a PRD into a phased implementation plan using vertical slices (tracer bullets). Output is a Markdown file in `./plans/`.
+Break a PRD into architectural decisions and phased vertical slices (tracer bullets). Output is merged directly into `specs/functional-spec.md` using `Prompts/spec-template.md`.
 
 ## Process
 
@@ -27,7 +27,7 @@ Before slicing, identify high-level decisions that are unlikely to change throug
 - Authentication / authorization approach
 - Third-party service boundaries
 
-These go in the plan header so every phase can reference them.
+These go into **§3 架构决策** of the spec so every Phase can reference them.
 
 ### 4. Draft vertical slices
 
@@ -55,53 +55,6 @@ Ask the user:
 
 Iterate until the user approves the breakdown.
 
-### 6. Write the plan file
+### 6. Write into the spec
 
-Create `./plans/` if it doesn't exist. Write the plan as a Markdown file named after the feature (e.g. `./plans/user-onboarding.md`). Use the template below.
-
-<plan-template>
-# Plan: <Feature Name>
-
-> Source PRD: <brief identifier or link>
-
-## Architectural decisions
-
-Durable decisions that apply across all phases:
-
-- **Routes**: ...
-- **Schema**: ...
-- **Key models**: ...
-- (add/remove sections as appropriate)
-
----
-
-## Phase 1: <Title>
-
-**User stories**: <list from PRD>
-
-### What to build
-
-A concise description of this vertical slice. Describe the end-to-end behavior, not layer-by-layer implementation.
-
-### Acceptance criteria
-
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
-
----
-
-## Phase 2: <Title>
-
-**User stories**: <list from PRD>
-
-### What to build
-
-...
-
-### Acceptance criteria
-
-- [ ] ...
-
-<!-- Repeat for each phase -->
-</plan-template>
+Do NOT create a separate `plans/` file. Instead, populate the **§3 架构决策** and **§4 实施阶段** sections of `specs/functional-spec.md` using the spec template structure. Each Phase gets numbered acceptance criteria (AC-1.1, AC-1.2, etc.) that tasks will reference directly.

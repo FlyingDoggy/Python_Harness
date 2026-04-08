@@ -9,9 +9,10 @@ A meta-project for building Python projects with AI-assisted, spec-driven develo
 ```
 You ←→ Planning Agent                  Coding Agent 1      Coding Agent 2
        │                                    │                    │
-       │ discuss ideas & design             │                    │
-       │ write functional spec              │                    │
-       │ decompose into tasks               │                    │
+       │ interview → write PRD (Epic)        │                    │
+       │  or confirm in chat (Patch/Feature) │                    │
+       │ write/update spec (phases + AC)     │                    │
+       │ decompose into tasks                │                    │
        │                                    │                    │
        ├── dispatch ──────────────────────→ TDD on branch       │
        ├── dispatch ─────────────────────────────────────────→ TDD on branch
@@ -21,6 +22,8 @@ You ←→ Planning Agent                  Coding Agent 1      Coding Agent 2
        │                           done ←───┘                    │
        │ review & merge                     │           done ←───┘
        │ review & merge                     │                    │
+       │                                    │                    │
+       │ (every 5 phases) auto PRD sync     │                    │
 ```
 
 **Planning Agent** runs in this directory — talks to you, writes specs, breaks work into tasks, dispatches coding agents, reviews and merges.
@@ -58,11 +61,21 @@ The planning agent will scaffold `Workspace/my-tool/` with everything ready to g
 
 ## Development Workflow
 
-1. **Spec** — Discuss requirements with the planning agent. It writes `specs/functional-spec.md`.
-2. **Decompose** — Planning agent breaks the spec into independent tasks in `.tasks/backlog/`.
-3. **Dispatch** — Planning agent creates git worktrees and launches coding agents.
-4. **Build** — Coding agents work in parallel: TDD, commit to feature branches.
-5. **Merge** — Planning agent reviews, runs quality gate, merges to main.
+The planning agent adapts the process based on scope:
+
+| Tier | Scope | Flow | PRD? |
+|------|-------|------|------|
+| **Patch** | 1 task | Chat confirm → Task → Dispatch | No |
+| **Feature** | 2-5 tasks | Chat confirm → Append Phase to Spec → Tasks | No |
+| **Epic** | 5+ tasks | PRD Interview → Spec → Tasks | Yes |
+
+1. **Discuss & PRD** — For Epics: deep interview to produce a PRD. For Patches/Features: confirm in conversation.
+2. **Spec** — Create or update `specs/functional-spec.md` with phases, acceptance criteria, and traceability.
+3. **Decompose** — Break each phase into independent tasks in `.tasks/backlog/`.
+4. **Dispatch** — Create git worktrees and launch coding agents.
+5. **Build** — Coding agents work in parallel: TDD, commit to feature branches.
+6. **Merge** — Planning agent reviews, runs quality gate, merges to main.
+7. **PRD Sync** — Every 5 completed conversation-sourced phases, auto-generate consolidated PRD for compliance.
 
 All projects follow strict rules:
 - No code without a spec
@@ -77,9 +90,16 @@ All projects follow strict rules:
 ├── Specs/             Harness specifications
 ├── Skills/            Reusable Claude Code skills
 │   ├── project-init/      Project scaffolding
+│   ├── write-a-prd/       PRD interview & creation
+│   ├── prd-to-plan/       PRD to spec phases
+│   ├── prd-sync/          Auto-consolidate PRD from completed phases
 │   ├── spec-driven-dev/   Spec writing & review
+│   ├── design-an-interface/ Interface design ("Design It Twice")
 │   ├── test-runner/       Quality gate checks
-│   └── code-review/      Code review process
+│   ├── code-review/       Code review process
+│   ├── improve-codebase-architecture/ Module deepening
+│   ├── frontend-design/   High-quality UI design
+│   └── auto-improve/      Autonomous improvement loop
 ├── Templates/         Project scaffolds
 │   ├── default/           Base template (shared by all)
 │   ├── cli-app/           Click CLI boilerplate
@@ -110,6 +130,7 @@ my-project/
 │   ├── done/              Completed, awaiting review
 │   └── merged/            Archived
 ├── specs/                 Functional spec (Chinese)
+├── prd/                   PRD documents (auto-synced)
 ├── src/<package>/         Source code (src layout)
 ├── tests/                 unit / integration / e2e
 └── reports/               Coverage, etc.

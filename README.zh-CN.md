@@ -9,8 +9,9 @@
 ```
 你 ←→ 规划 Agent                         编码 Agent 1        编码 Agent 2
       │                                      │                    │
-      │ 讨论需求和设计                         │                    │
-      │ 编写功能规格                           │                    │
+      │ 访谈 → 写 PRD（Epic 级）               │                    │
+      │  或对话确认需求（Patch/Feature 级）      │                    │
+      │ 编写/更新规格（分期 + 验收标准）          │                    │
       │ 分解为任务                             │                    │
       │                                      │                    │
       ├── 分发任务 ─────────────────────────→ 在分支上 TDD 开发     │
@@ -21,6 +22,8 @@
       │                            完成 ←─────┘                    │
       │ 审查 & 合并                            │          完成 ←────┘
       │ 审查 & 合并                            │                    │
+      │                                      │                    │
+      │ （每完成5个阶段）自动 PRD 同步           │                    │
 ```
 
 **规划 Agent** 运行在本目录——与你交互，编写规格，将工作拆分为任务，分发给编码 Agent，审查并合并代码。
@@ -58,11 +61,21 @@
 
 ## 开发工作流
 
-1. **规格** — 与规划 Agent 讨论需求，它会编写 `specs/functional-spec.md`。
-2. **分解** — 规划 Agent 将规格拆分为独立任务，放入 `.tasks/backlog/`。
-3. **分发** — 规划 Agent 创建 git worktree 并启动编码 Agent。
-4. **开发** — 编码 Agent 并行工作：TDD 开发，提交到功能分支。
-5. **合并** — 规划 Agent 审查代码，运行质量检查，合并到 main。
+规划 Agent 根据需求规模自适应流程：
+
+| 层级 | 规模 | 流程 | 需要 PRD？ |
+|------|------|------|----------|
+| **Patch** | 1 个任务 | 对话确认 → 任务 → 分发 | 否 |
+| **Feature** | 2-5 个任务 | 对话确认 → 追加 Phase 到规格 → 任务 | 否 |
+| **Epic** | 5+ 个任务 | PRD 访谈 → 规格 → 任务 | 是 |
+
+1. **讨论 & PRD** — Epic 级：深度访谈产出 PRD；Patch/Feature 级：对话确认即可。
+2. **规格** — 创建或更新 `specs/functional-spec.md`，包含分期、验收标准和来源追溯。
+3. **分解** — 将每个 Phase 拆分为独立任务放入 `.tasks/backlog/`。
+4. **分发** — 创建 git worktree 并启动编码 Agent。
+5. **开发** — 编码 Agent 并行工作：TDD 开发，提交到功能分支。
+6. **合并** — 规划 Agent 审查代码，运行质量检查，合并到 main。
+7. **PRD 同步** — 每完成 5 个对话确认来源的 Phase，自动生成合并 PRD 用于合规追溯。
 
 所有项目遵循严格规则：
 - 没有规格不写代码
@@ -77,9 +90,16 @@
 ├── Specs/             Harness 自身的规格说明
 ├── Skills/            可复用的 Claude Code 技能
 │   ├── project-init/      项目脚手架
+│   ├── write-a-prd/       PRD 访谈与创建
+│   ├── prd-to-plan/       PRD 转规格分期
+│   ├── prd-sync/          自动汇总 PRD（已完成 Phase 合规回填）
 │   ├── spec-driven-dev/   规格编写与评审
+│   ├── design-an-interface/ 接口设计（"双方案对比"）
 │   ├── test-runner/       质量检查
-│   └── code-review/       代码审查
+│   ├── code-review/       代码审查
+│   ├── improve-codebase-architecture/ 架构优化（模块深化）
+│   ├── frontend-design/   高质量 UI 设计
+│   └── auto-improve/      自动化改进循环
 ├── Templates/         项目模板
 │   ├── default/           基础模板（所有模板共用）
 │   ├── cli-app/           Click CLI 脚手架
@@ -110,6 +130,7 @@ my-project/
 │   ├── done/              已完成待审查
 │   └── merged/            已归档
 ├── specs/                 功能规格（中文）
+├── prd/                   PRD 文档（自动同步）
 ├── src/<package>/         源代码（src layout）
 ├── tests/                 unit / integration / e2e
 └── reports/               覆盖率等报告
