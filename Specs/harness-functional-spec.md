@@ -1,8 +1,12 @@
 # Python Harness 功能规格说明书
 
-**版本**: 0.1.0
-**日期**: 2025-03-15
-**状态**: 草案
+**版本**: 0.2.0
+**日期**: 2026-04-13
+**状态**: 活跃维护
+
+**变更记录**:
+- v0.2.0 (2026-04-13): 同步 CLAUDE.md 演进——新增 Tiered Workflow、Critic Review Loop、PRD 全链路（write→plan→sync）、12 Skills、web-app 模板、双语 README 规则；移除 MCPs/Scripts 幽灵目录
+- v0.1.0 (2025-03-15): 初始草案
 
 ---
 
@@ -34,48 +38,48 @@ Python Harness 是一个**元项目（Meta-Project）**——它本身不是一�
 
 ```
 Python_Harness/                  # Harness 根目录（自身是一个 Git 仓库）
-├── CLAUDE.md                    # Harness 级别的 Claude Code 配置
+├── CLAUDE.md                    # Harness 级别的 Agent 配置（双角色 + Tiered Workflow）
 ├── .gitignore                   # 排除 Workspace 下的所有项目
 │
 ├── Specs/                       # Harness 自身的规格说明
 │   └── harness-functional-spec.md
 │
-├── Skills/                      # 跨项目复用的 Claude Code Skills
-│   ├── project-init/            # 项目初始化技能
-│   ├── spec-driven-dev/         # 规范驱动开发技能
-│   ├── test-runner/             # 测试执行与报告技能
-│   └── code-review/             # 代码审查技能
-│
-├── MCPs/                        # MCP 服务器配置
-│   ├── mcp-config.json          # MCP 服务器统一配置
-│   └── servers/                 # 自定义 MCP 服务器（如有）
+├── Skills/                      # 跨项目复用的 Agent Skills（12 个）
+│   ├── project-init/            # 项目初始化
+│   ├── write-a-prd/             # PRD 深度访谈与编写
+│   ├── prd-to-plan/             # PRD → 规格 Phase 转换
+│   ├── prd-sync/                # PRD 自动回填（5+ 对话确认 Phase 后触发）
+│   ├── spec-driven-dev/         # 规范编写与评审
+│   ├── critic-review/           # Critic Agent 对抗性审查
+│   ├── design-an-interface/     # 接口设计（"Design It Twice"）
+│   ├── test-runner/             # 质量门禁（test/lint/type）
+│   ├── code-review/             # 代码审查
+│   ├── improve-codebase-architecture/ # 架构改进（模块深化）
+│   ├── frontend-design/         # 前端 UI 设计质量
+│   └── auto-improve/            # 自主改进循环（自动 PR）
 │
 ├── Prompts/                     # 可复用的提示词模板
 │   ├── spec-template.md         # 功能规格模板
 │   ├── task-template.md         # 任务文件模板
-│   ├── api-spec-template.md     # API 规格模板
 │   ├── review-checklist.md      # 代码审查清单
 │   └── test-plan-template.md    # 测试计划模板
 │
-├── Scripts/                     # 跨项目工具脚本
-│   ├── init-project.sh          # 项目初始化脚本
-│   ├── check-env.sh             # 环境检查脚本
-│   └── report-gen.py            # 报告生成工具
-│
-├── Templates/                   # 项目模板
-│   ├── default/                 # 默认项目模板
-│   ├── cli-app/                 # CLI 应用模板
-│   ├── web-api/                 # Web API 模板
-│   └── data-pipeline/           # 数据处理管道模板
+├── Templates/                   # 项目模板（5 种）
+│   ├── default/                 # 通用 Python 库/工具
+│   ├── cli-app/                 # CLI 应用
+│   ├── web-api/                 # Web API 服务
+│   ├── data-pipeline/           # 数据处理管道
+│   └── web-app/                 # 复合 Web 应用（Python 后端 + React 前端）
 │
 ├── Docs/                        # Harness 文档
-│   ├── getting-started.md       # 快速开始指南
-│   ├── development-workflow.md  # 开发工作流说明
-│   └── tool-integration.md      # 工具集成说明
+│   └── getting-started.md       # 快速开始指南
 │
 └── Workspace/                   # 所有项目的工作区（.gitignore 排除）
-    ├── project-alpha/           # 示例：项目 Alpha
-    ├── project-beta/            # 示例：项目 Beta
+    ├── AI-PPT/                  # AI PPT 架构师
+    ├── FC-CDT-AI-OPS/           # AI DevOps 平台
+    ├── flowdeck/                # Flow Deck 项目
+    ├── Product-Knowledge-Base/  # 产品知识库
+    ├── TA-Doc-Parsing-Tool/     # 文档解析工具
     └── .../
 ```
 
@@ -132,13 +136,19 @@ project-name/                    # 项目根目录（独立 Git 仓库）
 
 职责：
 - 与人类讨论软件整体构想、功能设计、技术决策
-- 编写和维护功能规格（specs/functional-spec.md）
+- 根据 Tiered Workflow（见 §2.3.2）判断需求范围，决定是否需要 PRD
+- 对 Feature/Epic 范围的设计发起 Critic Review（见 §2.3.3）
+- 使用 `write-a-prd` 技能（Epic 范围）进行深度访谈并生成 PRD
+- 使用 `prd-to-plan` 技能将 PRD 转化为规格 Phase
+- 编写和维护功能规格（specs/functional-spec.md），每个 Phase 包含 `来源`、`状态` 字段和编号验收标准（AC-1.1, AC-1.2）
 - 将规格分解为独立的、可并行的编码任务
 - 决定需要多少个编码 Agent、如何分配任务
 - 将任务写入任务队列（.tasks/ 目录）
 - 监控编码 Agent 的进度和产出
 - 协调合并顺序，处理潜在的分支冲突
 - 进行最终的代码审查和合并决策
+- 合并后标记 Spec Phase `状态` 为 `✅ 已完成`
+- 在 5+ 对话确认 Phase 完成后，自动触发 `prd-sync` 技能回填 PRD
 
 **编码 Agent（Coding Agent）**
 
@@ -153,7 +163,54 @@ project-name/                    # 项目根目录（独立 Git 仓库）
 
 编码 Agent **不负责**：规格讨论、架构决策、跨任务协调、合并到 main。
 
-#### 2.3.2 协作流程
+#### 2.3.2 Tiered Workflow（分级工作流）
+
+并非所有需求都需要完整的 PRD 仪式。规划 Agent 先评估需求范围，选择对应的流程：
+
+| 级别 | 范围 | 流程 | PRD? |
+|------|------|------|------|
+| **Patch** | 1 个任务，单一变更 | 对话确认 → Task → Dispatch | 否 |
+| **Feature** | 2-5 个任务，1 个 Phase | 对话确认 → Spec 追加 Phase → Tasks → Dispatch | 否 |
+| **Epic** | >5 个任务，多 Phase | PRD 访谈 → Spec → Tasks → Dispatch | 是 |
+
+- Patch 和 Feature 级别：Spec Phase 的 `来源` 字段记录 `对话确认 (日期)`
+- 当 5+ 对话确认来源的 Phase 完成合并后，自动触发 `prd-sync` 技能回填 PRD
+
+#### 2.3.3 Critic Review Loop（对抗性审查）
+
+对 **Feature** 和 **Epic** 级别的设计，规划 Agent 必须在提交给人类审核前，通过 Critic Agent 进行对抗性审查。
+
+**触发条件**：
+- 规划 Agent 产出初始设计/架构方案后
+- 人类反馈后修改设计后
+- 最终确定 Spec Phase 和验收标准前
+
+**协议流程**：
+```
+人类输入
+    │
+    ▼
+规划 Agent 构思 → 初始方案
+    │
+    ▼
+Critic Agent 审查 → 结构化批评（CRITICAL / HIGH / MEDIUM / LOW）
+    │
+    ▼
+规划 Agent 修订 → 改进方案
+    │
+    ▼
+人类审核 → 反馈 / 批准
+    │
+    ├── 反馈 → 规划 Agent 修订 → Critic 再审 → ...
+    └── 批准 → 进入 Spec / Tasks
+```
+
+**跳过条件**（以下情况可不执行 Critic Review）：
+- Patch 级别（范围极小，单一变更）
+- 纯实现细节，无设计决策
+- 紧急修复（速度优先于审查深度）
+
+#### 2.3.4 协作流程
 
 ```
 人类 ←→ 规划 Agent                    编码 Agent 1    编码 Agent 2    编码 Agent N
@@ -186,7 +243,7 @@ project-name/                    # 项目根目录（独立 Git 仓库）
 
 **关键设计点**：人类与规划 Agent 的讨论和编码 Agent 的开发**同时进行**。人类不需要等待编码完成就可以继续讨论下一批功能。
 
-#### 2.3.3 任务队列机制
+#### 2.3.5 任务队列机制
 
 任务通过项目目录下的 `.tasks/` 目录管理，每个任务是一个 Markdown 文件：
 
@@ -240,7 +297,7 @@ project-name/                    # 项目根目录（独立 Git 仓库）
 <规划 Agent 给编码 Agent 的额外说明、技术提示、注意事项>
 ```
 
-#### 2.3.4 任务分解原则
+#### 2.3.6 任务分解原则
 
 规划 Agent 在分解任务时应遵循以下原则：
 
@@ -249,7 +306,7 @@ project-name/                    # 项目根目录（独立 Git 仓库）
 3. **无文件冲突**：尽量避免两个并行任务修改同一个文件。如果不可避免，明确哪个任务先合并。
 4. **规模适当**：每个任务的规模应在一个编码 Agent 的单次会话内可完成。过大的任务应进一步拆分。
 
-#### 2.3.5 合并协调
+#### 2.3.7 合并协调
 
 规划 Agent 负责合并顺序的决策：
 
@@ -258,7 +315,7 @@ project-name/                    # 项目根目录（独立 Git 仓库）
 3. 有文件冲突风险的任务：规划 Agent 指定合并顺序，后合并的 Agent 需要 rebase。
 4. 合并前：规划 Agent 运行完整的质量检查，确认无回归。
 
-#### 2.3.6 编码 Agent 数量决策
+#### 2.3.8 编码 Agent 数量决策
 
 规划 Agent 根据以下因素决定编码 Agent 的数量：
 
@@ -298,6 +355,7 @@ project-name/                    # 项目根目录（独立 Git 仓库）
 | `cli-app` | 命令行应用 | click/typer, rich |
 | `web-api` | Web API 服务 | fastapi, uvicorn, httpx |
 | `data-pipeline` | 数据处理管道 | pandas, polars |
+| `web-app` | 复合 Web 应用（Python 后端 + React 前端） | fastapi, React 18, TypeScript, Vite |
 
 ### 3.2 规范驱动开发（SDD）工作流
 
@@ -373,24 +431,56 @@ project-name/                    # 项目根目录（独立 Git 仓库）
 
 #### 3.3.4 MCP 服务器集成
 
+MCP 服务器通过 Claude Code / VS Code 环境直接配置使用，不再在 Harness 内单独维护配置目录。
+
+常用 MCP 服务器：
+
 | MCP 服务器 | 用途 | 场景 |
 |-----------|------|------|
-| Python LSP | 代码智能（补全、跳转、重构） | 所有 Python 项目 |
+| Pylance | Python 语言智能（补全、类型、重构） | 所有 Python 项目 |
 | Context7 | 第三方库文档查询 | 依赖文档查阅 |
 | Playwright | 浏览器自动化 | Web 应用 E2E 测试、爬虫 |
-| Web Search | 网络搜索 | 查找技术方案、排查问题 |
-| Web Reader | 网页读取 | 阅读文档、参考资料 |
 
-#### 3.3.5 Claude Code Skills
+#### 3.3.5 Agent Skills
 
-Harness 提供以下可复用的 Skills：
+Harness 提供以下可复用的 Skills（12 个）：
+
+**PRD 与规划链路：**
+
+| Skill 名称 | 功能 | 触发场景 |
+|------------|------|---------|
+| `write-a-prd` | PRD 深度访谈与编写 | Epic 范围需求分析时 |
+| `prd-to-plan` | PRD → 规格 Phase 转换 | PRD 完成后转化为可执行规格 |
+| `prd-sync` | PRD 自动回填合并 | 5+ 对话确认 Phase 完成后 |
+
+**规格与设计：**
+
+| Skill 名称 | 功能 | 触发场景 |
+|------------|------|---------|
+| `spec-driven-dev` | 规范编写与评审辅助 | 编写或审查规格时 |
+| `critic-review` | Critic Agent 对抗性审查 | Feature/Epic 设计审查时 |
+| `design-an-interface` | 接口设计（"Design It Twice"） | 关键接口设计时 |
+
+**质量与审查：**
+
+| Skill 名称 | 功能 | 触发场景 |
+|------------|------|---------|
+| `test-runner` | 质量门禁（pytest + ruff + mypy） | 实现完成后、合并前 |
+| `code-review` | 代码审查 | 分支合并前 |
+
+**架构与前端：**
+
+| Skill 名称 | 功能 | 触发场景 |
+|------------|------|---------|
+| `improve-codebase-architecture` | 架构改进（模块深化） | 代码库结构需要优化时 |
+| `frontend-design` | 前端 UI 设计质量 | Web 应用前端开发时 |
+
+**项目与自动化：**
 
 | Skill 名称 | 功能 | 触发场景 |
 |------------|------|---------|
 | `project-init` | 初始化新项目 | 用户要求创建新项目时 |
-| `spec-driven-dev` | 规范编写与评审辅助 | 用户开始编写规范时 |
-| `test-runner` | 测试执行与报告 | 实现完成后 |
-| `code-review` | 代码审查 | 提交前或实现完成后 |
+| `auto-improve` | 自主改进循环（自动 PR） | 规划 Agent 发起持续改进时 |
 
 ### 3.4 项目级 CLAUDE.md 管理
 
@@ -413,6 +503,7 @@ Harness 提供以下可复用的 Skills：
 | Git 分支管理 | 分支命名、工作流、提交格式 | agent 需要遵循 git 规范 |
 | 合并标准 | 测试/lint/format/mypy 全部通过的清单 | agent 需要知道交付标准 |
 | 代码规范 | 语言约定、命名风格、类型注解要求 | agent 需要写符合规范的代码 |
+| 双语 README | README.md (English) + README.zh-CN.md (Chinese) 互链 | 每次变更需同步更新 |
 | 当前状态 | 开发阶段和进展 | agent 需要了解项目进度 |
 
 详细模板见 `Templates/default/CLAUDE.md.template`。
@@ -421,11 +512,14 @@ Harness 提供以下可复用的 Skills：
 
 ## 4. Harness 级 CLAUDE.md 设计
 
-Harness 根目录的 `CLAUDE.md` 定义了双角色 Agent 架构：
+Harness 根目录的 `CLAUDE.md` 定义了双角色 Agent 架构和完整的开发治理流程：
 
 - 根据运行位置自动判断角色（Harness 根目录 = 规划 Agent，项目目录 = 编码 Agent）
-- 规划 Agent 指令：讨论、规格编写、任务分解、分发、监控、合并
+- **Tiered Workflow**：Patch / Feature / Epic 三级范围判定，决定流程重量级
+- **Critic Review Loop**：Feature 和 Epic 设计的对抗性审查协议
+- 规划 Agent 9 项职责：Discuss & PRD → Specify → Decompose → Allocate → Dispatch → Monitor → Merge → PRD Sync → Iterate
 - 编码 Agent 指令：在项目自己的 CLAUDE.md 中，与 Harness 无关
+- **Hard Rules**：8 条不可违反的约束（含双语 README 规则）
 
 详见根目录 `CLAUDE.md`。
 
@@ -730,6 +824,7 @@ Thumbs.db
 - 规格说明、文档：使用**中文**
 - 代码、注释、commit message：使用**英文**
 - 变量命名：遵循 Python PEP 8（snake_case）
+- **README 双语规则**：每个项目必须同时维护 `README.md`（English）和 `README.zh-CN.md`（中文），互相交叉链接。任何修改必须在同一个 commit 中同步更新两个文件
 
 ---
 
@@ -771,11 +866,38 @@ Thumbs.db
 - [x] 更新项目 CLAUDE.md 模板，编码 Agent 可独立工作
 - [x] 创建任务模板文件（Prompts/task-template.md）
 
-### Phase 6：文档与优化
+### Phase 6：模板扩展 ✅
 
+- [x] 创建 cli-app 项目模板
+- [x] 创建 web-api 项目模板
+- [x] 创建 data-pipeline 项目模板
+- [x] 创建 web-app 复合模板（Python 后端 + React 前端）
 - [x] 编写快速开始指南（Docs/getting-started.md）
+
+### Phase 7：PRD 全链路与高级 Skills ✅
+
+- [x] 编写 write-a-prd Skill（PRD 深度访谈）
+- [x] 编写 prd-to-plan Skill（PRD → 规格 Phase 转换）
+- [x] 编写 prd-sync Skill（PRD 自动回填）
+- [x] 编写 critic-review Skill（对抗性审查）
+- [x] 编写 design-an-interface Skill（接口设计）
+- [x] 编写 improve-codebase-architecture Skill（架构改进）
+- [x] 编写 frontend-design Skill（前端 UI 设计）
+- [x] 编写 auto-improve Skill（自主改进循环）
+
+### Phase 8：治理流程升级 ✅
+
+- [x] 在 CLAUDE.md 中实现 Tiered Workflow（Patch/Feature/Epic 三级）
+- [x] 在 CLAUDE.md 中实现 Critic Review Loop
+- [x] 在 CLAUDE.md 中增加 PRD Sync 自动触发机制
+- [x] 在 CLAUDE.md 中增加 Hard Rule #8（双语 README）
+- [x] 规格 Phase 增加 `来源`、`状态` 字段和编号 AC
+
+### Phase 9：持续优化（进行中）
+
 - [ ] 根据实际使用反馈优化工作流
-- [ ] 增加更多项目模板（cli-app, web-api, data-pipeline）
+- [ ] 补充 Harness 文档（development-workflow.md 等）
+- [ ] 完善跨项目知识积累机制
 
 ---
 
@@ -786,10 +908,16 @@ Thumbs.db
 | Harness | 本项目——Python 项目开发工作台 |
 | Workspace | 所有项目的容器目录 |
 | SDD | 规范驱动开发（Spec-Driven Development） |
-| Skill | Claude Code 的可复用技能插件 |
+| Skill | Agent 的可复用技能插件 |
 | MCP | 模型上下文协议（Model Context Protocol） |
 | uv | Astral 出品的 Python 包管理工具 |
 | Planning Agent | 规划 Agent——与人类交互、编写规格、分解任务、协调合并 |
 | Coding Agent | 编码 Agent——从任务队列领取任务、独立开发、TDD |
+| Critic Agent | 评审 Agent——对设计方案进行对抗性审查（由规划 Agent 调用的子 Agent） |
 | Task Queue | 任务队列——.tasks/ 目录下的任务文件集合 |
 | Worktree | Git worktree——允许同一仓库在多个目录中同时检出不同分支 |
+| Tiered Workflow | 分级工作流——根据需求范围（Patch/Feature/Epic）选择不同的流程重量级 |
+| PRD | 产品需求文档（Product Requirements Document） |
+| Critic Review | 对抗性审查——独立 Agent 对设计方案的严格批评与挑战 |
+| Phase | 规格中的开发阶段，包含来源、状态和编号验收标准 |
+| AC | 验收标准（Acceptance Criteria），编号格式如 AC-1.1 |
