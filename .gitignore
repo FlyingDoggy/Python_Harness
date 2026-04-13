@@ -12,3 +12,5 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+arch.html
+api-pipeline.html
